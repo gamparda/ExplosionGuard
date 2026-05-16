@@ -1,0 +1,6 @@
+name: ExplosionGuard
+version: '1.0.0'
+main: com.sunglogbag81.explosionguard.ExplosionGuardPlugin
+api-version: '1.21'
+author: sunglogbag81
+description: Prevents explosion block damage while keeping explosion entity damage enabled.
