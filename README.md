@@ -1,10 +1,11 @@
 # ExplosionGuard
 
-Minecraft Paper/Spigot plugin that prevents explosions from breaking blocks while keeping explosion damage enabled.
+Minecraft Paper/Spigot plugin that prevents explosions from breaking blocks in the overworld while keeping explosion damage enabled. Nether and End explosions are allowed normally.
 
 ## Behavior
 
-- TNT, creepers, end crystals, beds, respawn anchors, fireballs, etc. do not destroy blocks.
+- Overworld TNT, creepers, end crystals, fireballs, etc. do not destroy blocks.
+- Nether and End explosions, including beds and respawn anchors, can destroy blocks normally.
 - Explosion damage and knockback still apply normally to players/entities.
 - No commands or permissions required.
 

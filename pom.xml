@@ -8,7 +8,7 @@
     <packaging>jar</packaging>
 
     <name>ExplosionGuard</name>
-    <description>Prevents explosion block damage while keeping explosion entity damage enabled.</description>
+    <description>Prevents overworld explosion block damage while allowing nether and end explosions.</description>
 
     <properties>
         <java.version>17</java.version>
