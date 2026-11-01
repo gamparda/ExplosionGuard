@@ -1,6 +1,15 @@
 name: ExplosionGuard
-version: '1.0.0'
+version: '1.1.1'
 main: com.sunglogbag81.explosionguard.ExplosionGuardPlugin
-api-version: '1.21'
+api-version: '26.3'
 author: sunglogbag81
-description: Prevents overworld explosion block damage while allowing nether and end explosions.
+description: Overworld explosion visuals with original world blocks and temporary client barriers.
+softdepend: [BlockLocker, WorldShield]
+commands:
+  explosionguard:
+    description: 폭발 복구 연출 관리
+    usage: /explosionguard [status|restore|reload]
+    permission: explosionguard.admin
+permissions:
+  explosionguard.admin:
+    default: op

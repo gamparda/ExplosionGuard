@@ -1,28 +1,56 @@
-# ExplosionGuard
+# ExplosionGuard 1.1.1
 
-Minecraft Paper/Spigot plugin that prevents explosions from breaking blocks in the overworld while keeping explosion damage enabled. Nether and End explosions are allowed normally.
+Paper 26.3-201 / Java 25. 리소스팩과 클라이언트 모드는 필요하지 않습니다.
 
-## Behavior
+## 동작
 
-- Overworld TNT, creepers, end crystals, fireballs, etc. do not destroy blocks.
-- Nether and End explosions, including beds and respawn anchors, can destroy blocks normally.
-- Explosion damage and knockback still apply normally to players/entities.
-- No commands or permissions required.
+오버월드의 실제 블록은 파괴하지 않고 일반적인 꽉 찬 블록만 화면에서 투명 방벽으로 표시합니다. 소리, 폭발 중심 효과, 엔티티 피해와 밀려남은 유지합니다. 실제 바닥과 충돌 모양이 유지되므로 플레이어나 몹이 아래 구멍으로 빠지지 않습니다.
 
-## Build
+기본 10초 후 폭발 중심에서 거리가 먼 깊은 블록부터 가까운 블록 순서로 복구합니다. 같은 거리에서는 낮은 블록부터 처리합니다. 기본 한 틱에 한 블록이며 정상 20 TPS에서 초당 약 20개입니다. 대규모 폭발은 복구에도 시간이 걸리며 서버 지연이나 통신 지연에 따라 화면에서 보이는 간격이 달라질 수 있습니다.
 
-```bash
-mvn clean package
+반블록, 계단, 상자, 통, 화로, 셜커, 표지판, 얼음, 슬라임, 꿀 등의 모양과 동작은 유지하고 파편 입자로만 연출합니다. 내용물, 표지판 앞뒷면 글자, 색, 발광, PDC를 복사하거나 덮어쓰지 않고 원본을 유지합니다. BlockLocker와 WorldShield 보호를 존중하며 네더와 엔드는 기존대로 폭발합니다.
+
+## 안티 엑스레이
+
+투명 방벽 바로 옆 여섯 면에 실제 블록 정보를 전송해 가짜 광물 대신 정상 벽면을 보여줍니다. 그보다 깊은 블록을 통째로 실제 정보로 바꾸지 않습니다. 실제 광물이 벽면에 있으면 잠시 보일 수 있으며 서버 운영자가 허용한 동작입니다. 클라이언트가 이미 받은 광물 정보를 기억하는 것까지 막지는 않습니다.
+
+개별 복구 중에는 남은 방벽을 유지합니다. 해당 청크와 경계에 걸친 연출이 모두 끝나면 World.refreshChunk로 Paper의 플레이어별 안티 엑스레이 처리를 적용한 청크를 재전송합니다. 벽면에 드러났던 광물도 난독화 대상으로 돌아갑니다. 청크 재수신과 재접속 시 남은 방벽과 노출 벽면을 재적용합니다.
+
+청크 갱신은 중복 제거하고 기본 틱당 2개까지만 처리합니다. 수동 복구와 설정 재읽기도 Paper 청크 갱신을 사용하며 플러그인 종료 때 표시를 정리합니다.
+
+## 설치
+
+서버를 정상 종료하고 기존 ExplosionGuard JAR을 제거한 뒤 ExplosionGuard-1.1.1.jar 하나만 plugins 폴더에 넣어 시작합니다. 기존 config.yml과 데이터 폴더는 유지합니다. 새 설정은 자동 추가됩니다. 운영 서버에 자동 설치하지 않았습니다. 제품 플러그인은 PacketEvents에 의존하지 않습니다.
+
+## 설정
+
+```yaml
+delay-seconds: 10
+max-mask-seconds: 30
+restore-blocks-per-tick: 50
+max-blocks-per-explosion: 1000
+max-pending-blocks: 10000
+max-particle-blocks-per-explosion: 32
+animation-blocks-per-tick: 1
+refresh-chunks-per-tick: 2
 ```
 
-The jar will be created at:
+animation-blocks-per-tick은 한 틱에 복구할 개수입니다. 1이면 하나씩, 값을 올리면 더 빠르게 복구합니다. 실제 처리 상한은 기존 restore-blocks-per-tick과 이 값 중 작은 값입니다. 기존 50을 유지해도 새 기본값 1로 개별 복구합니다.
 
-```text
-target/ExplosionGuard-1.0.0.jar
-```
+max-mask-seconds는 반복 폭발에 의한 대기 시간 연장 상한입니다. 순차 복구에 걸리는 시간까지 포함한 전체 종료 시한은 아닙니다. 설정 파일을 지우면 기본값으로 재생성하며 백업을 복원하지 않습니다. 파일 입출력 실패 시 메모리 기본값으로 보호를 유지합니다. 블록 원본을 저장하는 pending.yml은 만들지 않습니다.
 
-## Install
+## 관리자 명령
 
-1. Build or download the jar.
-2. Put it in your server's `plugins/` folder.
-3. Restart the server.
+권한 explosionguard.admin은 기본 OP입니다.
+
+- /explosionguard status: 블록 연출 및 청크 갱신 대기 수
+- /explosionguard restore: 연출을 중단하고 처리 예산에 따라 Paper 청크 원복
+- /explosionguard reload: 표시 정리를 요청하고 설정 다시 읽기
+
+## 검증
+
+Java 25에서 mvn package로 빌드합니다. 결과는 target/ExplosionGuard-1.1.1.jar입니다.
+
+단위 테스트 24개와 Paper 26.3-201의 실제 송신 패킷 테스트를 통과했습니다. 안티 엑스레이 2/3 모드의 벽면 정상화, 뒤쪽 난독화 유지, 단계별 복구 순서, 종료 후 재난독화, 청크 경계, 청크 재수신, 수동 복구와 플러그인 종료를 검증했습니다. 실제 TNT로 BlockLocker/WorldShield, 반블록, 상자 내용물과 PDC, 표지판, 엔티티 피해, 드롭 중복 방지를 재확인했습니다.
+
+검증 코드와 결과는 validation/에 있습니다. 테스트 하네스를 운영 서버에 설치하지 않습니다. 이번 테스트에는 Grim이 포함되지 않았습니다.

@@ -4,14 +4,14 @@
 
     <groupId>com.sunglogbag81</groupId>
     <artifactId>explosionguard</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.1</version>
     <packaging>jar</packaging>
 
     <name>ExplosionGuard</name>
     <description>Prevents overworld explosion block damage while allowing nether and end explosions.</description>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>25</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -27,14 +27,17 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.10-R0.1-SNAPSHOT</version>
+            <version>26.3.build.201-stable</version>
             <scope>provided</scope>
         </dependency>
+        <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>5.12.2</version><scope>test</scope></dependency>
+        <dependency><groupId>org.mockito</groupId><artifactId>mockito-core</artifactId><version>5.20.0</version><scope>test</scope></dependency>
     </dependencies>
 
     <build>
         <finalName>ExplosionGuard-${project.version}</finalName>
         <plugins>
+            <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><version>3.5.3</version><configuration><argLine>-javaagent:${settings.localRepository}/org/mockito/mockito-core/5.20.0/mockito-core-5.20.0.jar</argLine></configuration></plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

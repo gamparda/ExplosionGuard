@@ -1,0 +1,11 @@
+# 원본 블록을 유지하며 화면에만 투명한 방벽을 표시합니다.
+delay-seconds: 10
+max-mask-seconds: 30
+restore-blocks-per-tick: 50
+max-blocks-per-explosion: 1000
+max-pending-blocks: 10000
+max-particle-blocks-per-explosion: 32
+# 한 틱(정상 TPS 기준 0.05초)에 깊은 쪽부터 복구할 블록 수입니다.
+animation-blocks-per-tick: 1
+# 해당 청크의 연출이 끝난 후 Paper 안티 엑스레이를 적용해 갱신합니다.
+refresh-chunks-per-tick: 2
