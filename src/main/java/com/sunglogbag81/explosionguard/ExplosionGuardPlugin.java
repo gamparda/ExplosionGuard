@@ -29,25 +29,27 @@ public final class ExplosionGuardPlugin extends JavaPlugin implements Listener {
         try{settings=Settings.load(getDataFolder().toPath().resolve("config.yml"));}
         catch(Exception error){settings=Settings.defaults();getLogger().warning("설정 파일을 읽거나 저장할 수 없어 기본값으로 실행합니다: "+error);}
         protection=new ProtectionHook(this);barrier=Material.BARRIER.createBlockData();
-        getServer().getPluginManager().registerEvents(this,this);
+        getServer().getPluginManager().registerEvents(this,this);getServer().getPluginManager().registerEvents(new EntityShield(),this);
         getServer().getScheduler().runTaskTimer(this,()->{
             var restored=queue.expire(now(),Math.min(settings.restoreBudget(),settings.animationBudget()));
             restoreStep(restored);
             refreshes.addAll(OverlayView.chunks(restored));
             refreshPending(settings.refreshBudget(),true);
         },1,1);
-        getLogger().info("ExplosionGuard 1.1.1: exposed faces use real blocks; restoration uses Paper anti-xray chunk refresh.");
+        getLogger().info("ExplosionGuard 1.2.1: exposed faces use real blocks; restoration uses Paper anti-xray chunk refresh.");
     }
     @Override public void onDisable(){refreshes.addAll(OverlayView.chunks(queue.drain()));refreshPending(Integer.MAX_VALUE,false);}
 
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true)
     public void onEntityExplode(EntityExplodeEvent event) {
-        if(event.getLocation().getWorld().getEnvironment()==World.Environment.NORMAL)capture(event.blockList(),event.getLocation(),event::isCancelled);
+        if(breaksBlocks(event.getExplosionResult())&&event.getLocation().getWorld().getEnvironment()==World.Environment.NORMAL)capture(event.blockList(),event.getLocation(),event::isCancelled);
     }
     @EventHandler(priority=EventPriority.HIGHEST,ignoreCancelled=true)
     public void onBlockExplode(BlockExplodeEvent event) {
-        if(event.getBlock().getWorld().getEnvironment()==World.Environment.NORMAL)capture(event.blockList(),event.getBlock().getLocation().add(.5,.5,.5),event::isCancelled);
+        if(breaksBlocks(event.getExplosionResult())&&event.getBlock().getWorld().getEnvironment()==World.Environment.NORMAL)capture(event.blockList(),event.getBlock().getLocation().add(.5,.5,.5),event::isCancelled);
     }
+    /** Wind charges only push and toggle doors or buttons (TRIGGER_BLOCK); masking those blocks made them look invisible. */
+    static boolean breaksBlocks(ExplosionResult result){return result==ExplosionResult.DESTROY||result==ExplosionResult.DESTROY_WITH_DECAY;}
     private void capture(List<Block> affected,Location origin,BooleanSupplier cancelled) {
         var visible=List.copyOf(affected.subList(0,Math.min(affected.size(),settings.explosionLimit())));
         // Block destruction is disabled even if an optional visual/protection API fails below.
